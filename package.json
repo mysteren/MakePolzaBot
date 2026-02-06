@@ -1,0 +1,41 @@
+{
+  "name": "webhcheckbot",
+  "version": "0.1.0",
+  "description": "",
+  "keywords": [
+    "image",
+    "generate",
+    "telegram",
+    "bot",
+    "web"
+  ],
+  "homepage": "https://github.com/mysteren/MakeMeImage#readme",
+  "bugs": {
+    "url": "https://github.com/mysteren/MakeMeImage/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mysteren/MakeMeImage.git"
+  },
+  "license": "ISC",
+  "author": "TimofeyC",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch src/app/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "dotenv": "^17.2.3",
+    "grammy": "^1.39.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.0.10",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
