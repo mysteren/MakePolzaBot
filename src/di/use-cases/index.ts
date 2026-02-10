@@ -1,3 +1,5 @@
+import { Config } from "../../infrastructure/config/index.js";
+import { PolzaRequestUseCase } from "../../use-cases/polza-request.use-case.js";
 import { StartUseCase } from "../../use-cases/start.use-case.js";
 import { repositories } from "../repositories/index.js";
 
@@ -13,6 +15,11 @@ export const useCases = {
    * Use case для команды /start
    */
   start: new StartUseCase(repositories.user),
+
+  /**
+   *
+   */
+  polzaRequest: new PolzaRequestUseCase(Config.POLZA_AI_KEY),
 } as const;
 
 /**

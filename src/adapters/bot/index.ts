@@ -6,11 +6,15 @@ import { prepareHandler } from "./handlers/prepare.handler.js";
 import { runHandler } from "./handlers/run.handler.js";
 
 export function InitBot(token: string) {
+  const bot = new Bot<MyContext>(token);
+
   function initial() {
     return { state: "", messages: [] as string[], files: [] as string[] };
   }
 
-  const bot = new Bot<MyContext>(token);
+  function sendMessage(user: number, msg: string) {
+    bot.api.sendMessage(user, msg);
+  }
 
   bot.use(session({ initial }));
 
@@ -18,10 +22,10 @@ export function InitBot(token: string) {
   bot.command("start", startHandler);
 
   // Команда /prepare
-  bot.command("prepare", prepareHandler);
+  // bot.command("prepare", prepareHandler);
 
   // Команда /run
-  bot.command("run", runHandler);
+  // bot.command("run", runHandler);
 
   bot.on("message", messageHandler);
 
@@ -33,5 +37,5 @@ export function InitBot(token: string) {
       err.error,
     );
   });
-  return bot;
+  return { bot, sendMessage };
 }

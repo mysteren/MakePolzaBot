@@ -25,6 +25,9 @@ const envSchema = z.object({
 
   //
   CHECK_MINUTES_RANGE: z.coerce.number().min(5).default(15),
+
+  //
+  POLZA_AI_KEY: z.string().min(1, "BOT_TOKEN is required"),
 });
 
 // 3. Валидируем данные из process.env
