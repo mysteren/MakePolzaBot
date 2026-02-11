@@ -14,10 +14,13 @@ async function getImageUrls(
   // Обработка photo массива (берем последний элемент - наивысшее качество)
   if (msg.photo && msg.photo.length > 0) {
     const photo = msg.photo[msg.photo.length - 1];
-    const file = await ctx.api.getFile(photo.file_id);
 
-    if (file.file_path) {
-      urls.push(file.file_path);
+    if (photo) {
+      const file = await ctx.api.getFile(photo.file_id);
+
+      if (file.file_path) {
+        urls.push(file.file_path);
+      }
     }
   }
   // Обработка document (если это картинка)

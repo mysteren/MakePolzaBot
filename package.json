@@ -1,6 +1,6 @@
 {
-  "name": "webhcheckbot",
-  "version": "0.1.0",
+  "name": "makepolzaBot",
+  "version": "0.1.1",
   "description": "",
   "keywords": [
     "image",
@@ -9,13 +9,13 @@
     "bot",
     "web"
   ],
-  "homepage": "https://github.com/mysteren/MakeMeImage#readme",
+  "homepage": "https://github.com/mysteren/MakePolzaBot#readme",
   "bugs": {
-    "url": "https://github.com/mysteren/MakeMeImage/issues"
+    "url": "https://github.com/mysteren/MakePolzaBot/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mysteren/MakeMeImage.git"
+    "url": "git+https://github.com/mysteren/MakePolzaBot.git"
   },
   "license": "ISC",
   "author": "TimofeyC",
