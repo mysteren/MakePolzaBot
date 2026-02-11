@@ -11,6 +11,7 @@ type genStatusResponse = {
 
 interface resParams extends ImageGenerateParamsNonStreaming {
   imageResolution?: string;
+  filesUrl?: string[];
 }
 
 export class PolzaUseCase {
@@ -18,14 +19,12 @@ export class PolzaUseCase {
 
   private baseURL: string;
 
-  private apiKey: string;
-
   constructor(
-    apiKey: string,
+    private apiKey: string,
+    private apiBotKey: string,
     private userRepo: UserRepository,
   ) {
     this.baseURL = "https://api.polza.ai/api/v1";
-    this.apiKey = apiKey;
 
     this.openAi = new OpenAI({
       baseURL: this.baseURL,
@@ -61,7 +60,7 @@ export class PolzaUseCase {
     return completion.choices[0]?.message;
   }
 
-  async getImage(userId: number, prompt: string) {
+  async getImage(userId: number, prompt: string, urls?: string[]) {
     const user = this.userRepo.findById(userId);
     const options = user?.options ?? {};
 
@@ -72,7 +71,24 @@ export class PolzaUseCase {
       response_format: "url",
     };
 
-    if (options.model) {
+    if (urls) {
+      resParams.model =
+        options.model == "seedream-v4"
+          ? "seedream-v4-edit"
+          : (options.model ?? "seedream-v4-edit");
+
+      resParams.filesUrl = urls.map((url) => {
+        return "https://api.telegram.org/file/bot" + this.apiBotKey + "/" + url;
+      });
+
+      if (options.imageResolution) {
+        resParams.imageResolution = options.imageResolution;
+      }
+
+      if (options.size) {
+        resParams.size = options.size as any;
+      }
+    } else if (options.model) {
       resParams.model = options.model;
 
       if (options.imageResolution) {
@@ -127,10 +143,6 @@ export class PolzaUseCase {
         "Image generation timeout: status not resolved within 1 minute",
       );
     }
-
-    console.log("Final status:");
-    console.dir(finalStatus, { depth: null });
-
     return { url, status: finalStatus };
   }
 }

@@ -2,6 +2,35 @@ import { type Filter } from "grammy";
 import { DI } from "../../../di/index.js";
 import type { MyContext } from "../context.js";
 
+/**
+ * Получить URLs картинок из сообщения
+ */
+async function getImageUrls(
+  ctx: Filter<MyContext, "message">,
+): Promise<string[]> {
+  const urls: string[] = [];
+  const msg = ctx.message;
+
+  // Обработка photo массива (берем последний элемент - наивысшее качество)
+  if (msg.photo && msg.photo.length > 0) {
+    const photo = msg.photo[msg.photo.length - 1];
+    const file = await ctx.api.getFile(photo.file_id);
+
+    if (file.file_path) {
+      urls.push(file.file_path);
+    }
+  }
+  // Обработка document (если это картинка)
+  else if (msg.document && msg.document.mime_type?.startsWith("image/")) {
+    const file = await ctx.api.getFile(msg.document.file_id);
+    if (file.file_path) {
+      urls.push(file.file_path);
+    }
+  }
+
+  return urls;
+}
+
 // Обработка ввода URL
 export const messageHandler = async (ctx: Filter<MyContext, "message">) => {
   const userId = ctx.from!.id;
@@ -20,26 +49,34 @@ export const messageHandler = async (ctx: Filter<MyContext, "message">) => {
       try {
         const msg = ctx.message;
 
-        console.log(msg);
+        // Получаем текст запроса
+        const prompt = msg.text ?? msg.caption ?? "";
 
-        if (msg.text) {
-          const result = await DI.useCases.polza.getImage(
-            userId,
-            msg.text ?? "",
+        // Получаем URLs картинок
+        const imageUrls = await getImageUrls(ctx);
+
+        // Если нет ни текста ни картинок - игнорируем
+        if (!prompt && imageUrls.length === 0) {
+          return;
+        }
+
+        const result = await DI.useCases.polza.getImage(
+          userId,
+          prompt,
+          imageUrls.length > 0 ? imageUrls : undefined,
+        );
+
+        if (result.url) {
+          ctx.api.sendPhoto(ctx.chat.id, result.url);
+        } else {
+          await ctx.api.sendMessage(
+            ctx.chat.id,
+            "Не удалось сгенерировать изображение",
           );
-          // await ctx.api.sendMessage(ctx.chat.id, result?.content ?? "пусто :|");
-          //
-          if (result.url) {
-            ctx.api.sendPhoto(ctx.chat.id, result.url);
-          } else {
-            await ctx.api.sendMessage(
-              ctx.chat.id,
-              "Не удалось сгенерировать изображение",
-            );
-          }
         }
       } catch (err) {
         if (err instanceof Error) {
+          console.error(err);
           await ctx.api.sendMessage(ctx.chat.id, "Ошибка: " + err.message);
         }
       } finally {

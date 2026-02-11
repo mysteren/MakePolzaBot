@@ -19,7 +19,11 @@ export const useCases = {
   /**
    *
    */
-  polza: new PolzaUseCase(Config.POLZA_AI_KEY, repositories.user),
+  polza: new PolzaUseCase(
+    Config.POLZA_AI_KEY,
+    Config.BOT_TOKEN,
+    repositories.user,
+  ),
 } as const;
 
 /**
