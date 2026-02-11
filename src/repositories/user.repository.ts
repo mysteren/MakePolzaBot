@@ -27,18 +27,19 @@ export class UserRepository {
     const now = new Date().toISOString();
 
     const stmt = this.database.prepare(`
-      INSERT INTO users (id, username, options, active, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO users (id, username, options, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
-    stmt.run(
+    const result = stmt.run(
       user.id,
       user.username || null,
       JSON.stringify(user.options),
-      true,
       now,
       now,
     );
+
+    console.log(result);
 
     return {
       ...user,

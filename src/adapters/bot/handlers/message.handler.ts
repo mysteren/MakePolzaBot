@@ -1,11 +1,10 @@
+import { type Filter } from "grammy";
 import { DI } from "../../../di/index.js";
-import { sleep } from "../../../shared/utils.js";
 import type { MyContext } from "../context.js";
-import { InlineKeyboard, type Filter } from "grammy";
 
 // Обработка ввода URL
 export const messageHandler = async (ctx: Filter<MyContext, "message">) => {
-  console.log(ctx.session);
+  const userId = ctx.from!.id;
 
   // Проверяем, не запущена ли генерация
   if (ctx.session.state === "running") {
@@ -24,10 +23,10 @@ export const messageHandler = async (ctx: Filter<MyContext, "message">) => {
         console.log(msg);
 
         if (msg.text) {
-          const result = await DI.useCases.polzaRequest.getImage(
+          const result = await DI.useCases.polza.getImage(
+            userId,
             msg.text ?? "",
           );
-          console.log(result);
           // await ctx.api.sendMessage(ctx.chat.id, result?.content ?? "пусто :|");
           //
           if (result.url) {
@@ -39,13 +38,6 @@ export const messageHandler = async (ctx: Filter<MyContext, "message">) => {
             );
           }
         }
-
-        // const file = await ctx.getFile();
-
-        // console.log(file);
-
-        // Долгая операция
-        // await sleep(5000);
       } catch (err) {
         if (err instanceof Error) {
           await ctx.api.sendMessage(ctx.chat.id, "Ошибка: " + err.message);
@@ -55,8 +47,4 @@ export const messageHandler = async (ctx: Filter<MyContext, "message">) => {
       }
     });
   }
-
-  // const data = ctx.message.text ?? "";
-
-  // console.log(ctx.message);
 };

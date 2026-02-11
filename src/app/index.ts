@@ -5,7 +5,7 @@ import { Config } from "../infrastructure/config/index.js";
 
 // Функция запуска
 const run = async () => {
-  const { bot, sendMessage } = InitBot(Config.BOT_TOKEN);
+  const { bot } = InitBot(Config.BOT_TOKEN);
   try {
     console.log("Запускаем бота");
     await bot.start();

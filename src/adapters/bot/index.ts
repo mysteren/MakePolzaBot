@@ -2,8 +2,11 @@ import { Bot, session } from "grammy";
 import type { MyContext } from "./context.js";
 import { messageHandler } from "./handlers/message.handler.js";
 import { startHandler } from "./handlers/start.handler.js";
-import { prepareHandler } from "./handlers/prepare.handler.js";
-import { runHandler } from "./handlers/run.handler.js";
+import {
+  settingsHandler,
+  settingsCallbackHandler,
+  getOptionsHandler,
+} from "./handlers/settings.handler.js";
 
 export function InitBot(token: string) {
   const bot = new Bot<MyContext>(token);
@@ -21,13 +24,17 @@ export function InitBot(token: string) {
   // Команда /start
   bot.command("start", startHandler);
 
-  // Команда /prepare
-  // bot.command("prepare", prepareHandler);
+  // Команда /settings
+  bot.command("settings", settingsHandler);
+  bot.command("config", settingsHandler);
 
-  // Команда /run
-  // bot.command("run", runHandler);
+  bot.command("getoptions", getOptionsHandler);
 
+  //  обработка сообщений
   bot.on("message", messageHandler);
+
+  // Обработка callback query для настроек
+  bot.on("callback_query:data", settingsCallbackHandler);
 
   // Обработка ошибок
   bot.catch((err) => {

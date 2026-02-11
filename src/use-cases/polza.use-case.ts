@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { sleep } from "../shared/utils.js";
+import type { UserRepository } from "../repositories/user.repository.js";
+import type { ImageGenerateParamsNonStreaming } from "openai/resources";
 
 type genStatusResponse = {
   id: string;
@@ -7,14 +9,21 @@ type genStatusResponse = {
   url: string;
 };
 
-export class PolzaRequestUseCase {
+interface resParams extends ImageGenerateParamsNonStreaming {
+  imageResolution?: string;
+}
+
+export class PolzaUseCase {
   private openAi: OpenAI;
 
   private baseURL: string;
 
   private apiKey: string;
 
-  constructor(apiKey: string) {
+  constructor(
+    apiKey: string,
+    private userRepo: UserRepository,
+  ) {
     this.baseURL = "https://api.polza.ai/api/v1";
     this.apiKey = apiKey;
 
@@ -52,17 +61,30 @@ export class PolzaRequestUseCase {
     return completion.choices[0]?.message;
   }
 
-  async getImage(prompt: string) {
-    const response = await this.openAi.images.generate({
+  async getImage(userId: number, prompt: string) {
+    const user = this.userRepo.findById(userId);
+    const options = user?.options ?? {};
+
+    const resParams: resParams = {
       model: "seedream-v4",
       prompt,
       n: 1,
-      quality: "standard",
       response_format: "url",
-    });
+    };
 
-    console.log("Initial generation result:");
-    console.dir(response, { depth: null });
+    if (options.model) {
+      resParams.model = options.model;
+
+      if (options.imageResolution) {
+        resParams.imageResolution = options.imageResolution;
+      }
+
+      if (options.size) {
+        resParams.size = options.size as any;
+      }
+    }
+
+    const response = await this.openAi.images.generate(resParams);
 
     // Получаем ID сгенерированного изображения для отслеживания статуса
     const imageId = (response as unknown as { requestId: string }).requestId;
@@ -71,13 +93,11 @@ export class PolzaRequestUseCase {
       throw new Error("Failed to get image ID from response");
     }
 
-    console.log(`Tracking image generation with ID: ${imageId}`);
-
     // Поллинг статуса каждые 5 секунд, максимум 12 попыток (1 минута)
     const maxAttempts = 12;
     let attempt = 0;
     let finalStatus: genStatusResponse | null = null;
-    let url: string;
+    let url: string = "";
 
     while (attempt < maxAttempts) {
       attempt++;

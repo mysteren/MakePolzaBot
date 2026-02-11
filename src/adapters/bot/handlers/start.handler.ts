@@ -6,9 +6,7 @@ export const startHandler = async (ctx: Context) => {
   const username = ctx.from?.username;
   const firstName = ctx.from?.first_name || "Пользователь";
 
-  // Вызываем бизнес-логику
-
-  const responseMessage = DI.useCases.start.run({
+  const responseMessage = DI.useCases.user.start({
     userId,
     username: username || null,
     firstName,
